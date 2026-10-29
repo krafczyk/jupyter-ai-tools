@@ -34,7 +34,14 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.0"]
-test = ["pytest>=7.0", "pytest-jupyter[server]>=0.6", "pytest-asyncio", "mcp>=1.0"]
+test = [
+  "pytest>=7.0",
+  "pytest-jupyter[server]>=0.6",
+  "pytest-asyncio",
+  "mcp>=1.0",
+  "jupyter-server-fileid>=0.9.2,<0.10",
+  "jupyterlab-commands-toolkit>=0.1.6,<0.2",
+]
 lint = [
   "black>=22.6.0",
   "ruff>=0.0.156",

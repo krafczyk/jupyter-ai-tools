@@ -1,8 +1,10 @@
+"""Expose agent toolkits and register the Jupyter AI Tools server extension."""
+
 from .toolkits.code_execution import toolkit as exec_toolkit
 from .toolkits.file_system import toolkit as fs_toolkit
 from .toolkits.notebook import toolkit as nb_toolkit
 
-__version__ = "0.5.2"
+__version__ = "0.5.2+mkchad.1"
 
 __all__ = [
     "fs_toolkit",

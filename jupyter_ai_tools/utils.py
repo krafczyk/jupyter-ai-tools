@@ -1,3 +1,5 @@
+"""Shared path, collaborative-document lookup, awareness, and rendering helpers."""
+
 import functools
 import inspect
 import os
@@ -27,18 +29,28 @@ def get_serverapp():
 
 def normalize_filepath(file_path: str) -> str:
     """
-    Normalizes a file path for Jupyter applications to return an absolute path.
+    Return an absolute lexical path without resolving filesystem symlinks.
 
     Handles various input formats:
-    - Relative paths from current working directory
+    - Relative paths from the server root (or cwd when server lookup fails)
     - URL-encoded relative paths (common in Jupyter contexts)
     - Absolute paths (returned as-is after normalization)
 
     Args:
-        file_path: Path in any of the supported formats
+        file_path: Nonempty path string in any of the supported formats.
+            URL escapes are decoded once per call, as in the existing API.
 
     Returns:
-        Absolute path to the file
+        Absolute path with dot segments collapsed and symlink spelling preserved,
+        matching Jupyter's path-keyed file-ID registry. Does not access the file,
+        check existence, enforce root containment, or grant access permissions.
+
+    Raises:
+        ValueError: If the input is empty or whitespace-only.
+
+    Dot segments are lexical: ``link/../file`` refers to the lexical parent of
+    ``link``, not its target's parent. This helper is not an authorization check;
+    callers retain responsibility for their supported path/access policy.
 
     Example:
         >>> normalize_filepath("notebooks/my%20notebook.ipynb")
@@ -59,7 +71,7 @@ def normalize_filepath(file_path: str) -> str:
 
     # If already absolute, just normalize and return
     if path.is_absolute():
-        return str(path.resolve())
+        return os.path.abspath(path)
 
     # For relative paths, get the Jupyter server's root directory
     try:
@@ -69,9 +81,9 @@ def normalize_filepath(file_path: str) -> str:
         # Fallback to current working directory if server app is not available
         root_dir = os.getcwd()
 
-    # Resolve relative path against the root directory
+    # Preserve the API spelling used by Jupyter's path-keyed file-ID manager.
     resolved_path = Path(root_dir) / path
-    return str(resolved_path.resolve())
+    return os.path.abspath(resolved_path)
 
 
 async def get_room(room_id: str):

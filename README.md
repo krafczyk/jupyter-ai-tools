@@ -1,5 +1,8 @@
 # jupyter_ai_tools
 
+MkChad's `0.5.2+mkchad.1` maintenance build preserves symlink-backed notebook
+identity. See [maintenance, qualification, and deployment](docs/mkchad-maintenance.md).
+
 [![Github Actions Status](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/workflows/Build/badge.svg)](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/actions/workflows/build.yml)
 
 **`jupyter_ai_tools`** is a Jupyter Server extension that exposes a collection of powerful, agent-friendly tools for interacting with notebooks and Git repositories. It is designed for use by AI personas (like those in Jupyter AI) to programmatically modify notebooks, manage code cells, and interact with version control systems.
