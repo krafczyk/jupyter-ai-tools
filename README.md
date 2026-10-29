@@ -1,6 +1,6 @@
 # jupyter_ai_tools
 
-[![Github Actions Status](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/workflows/Build/badge.svg)](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/jupyter-ai-contrib/jupyter-ai-tools/actions/workflows/ci.yml)
 
 **`jupyter_ai_tools`** is a Jupyter Server extension that exposes a collection of powerful, agent-friendly tools for interacting with notebooks and Git repositories. It is designed for use by AI personas (like those in Jupyter AI) to programmatically modify notebooks, manage code cells, and interact with version control systems.
 
@@ -76,6 +76,33 @@ To install the extension, execute:
 ```bash
 pip install jupyter_ai_tools
 ```
+
+## Without a JupyterLab web client
+
+Without a real-time collaboration provider, the notebook tools run in the JupyterLab
+frontend through [jupyterlab-ai-commands](https://github.com/jupyter-ai-contrib/jupyterlab-ai-commands).
+When no JupyterLab tab is open, nothing holds a live model of the notebook, so the
+read and write tools (`read_notebook`, `add_cell`, `insert_cell`, `delete_cell`,
+`edit_cell`, ...) read and edit the notebook file on disk instead. The result of a
+write tool then says that the edit went to the file on disk.
+
+`run_cell` and `run_all_cells` with a `file_path` run the cells in a kernel on the
+server, and write the outputs to the notebook file on disk. They use the kernel of the
+notebook session, and start a session if there is none. JupyterLab connects to the same
+kernel when it opens the notebook.
+
+With `write_outputs=False`, `run_cell` and `run_all_cells` run the cells in the kernel of
+the notebook and return the outputs, without a change to the notebook. This works with
+or without a web client, and with or without RTC. The kernel state changes, but
+JupyterLab does not show the run.
+
+A kernel that these tools start keeps running after the run, as a kernel that
+JupyterLab starts does.
+
+The tools that need the user interface (`select_cell`, `get_active_notebook`,
+`get_active_cell_id`, `open_file`, and `run_cell` or `run_all_cells` without a
+`file_path`) return the error of `jupyterlab-commands-toolkit`, which asks to open
+JupyterLab in a web browser.
 
 ## Uninstall
 
