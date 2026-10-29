@@ -3,7 +3,7 @@ name: MkChad wheels
 on:
   push:
     branches: [mkchad-0.5.2]
-    tags: ['v*+mkchad.*']
+    tags: ['v*\+mkchad.*']
 
 permissions:
   contents: read
