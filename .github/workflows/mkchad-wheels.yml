@@ -1,0 +1,75 @@
+name: MkChad wheels
+
+on:
+  push:
+    branches: [mkchad-0.5.2]
+    tags: ['v*+mkchad.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mkchad-wheels-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'krafczyk/jupyter-ai-tools'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate explicit version and maintenance ancestry
+        id: version
+        run: |
+          version="$(python scripts/mkchad_release.py check-ref)"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+      - name: Install build and test tools
+        run: >-
+          python -m pip install build==1.6.1 hatchling==1.32.4 '.[test]'
+          mcp==1.28.1 pycrdt==0.12.50 jupyter-ydoc==3.4.1 jupyter-server==2.20.0
+      - name: Test
+        run: python -m pytest tests -q -o asyncio_default_fixture_loop_scope=function
+      - name: Build and verify wheel from sdist
+        run: |
+          python -m build --no-isolation
+          python scripts/mkchad_release.py verify-dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mkchad-wheels
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'krafczyk/jupyter-ai-tools'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: mkchad-wheels
+          path: dist
+      - name: Verify downloaded checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+      - name: Publish GitHub wheel release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          gh release create "$TAG" dist/* --verify-tag --draft \
+            --title "$TAG" --notes "MkChad Python maintenance build $VERSION. See build-provenance.json and SHA256SUMS for source identity and artifact hashes."
+          gh release edit "$TAG" --draft=false --latest=false

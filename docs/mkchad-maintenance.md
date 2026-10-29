@@ -101,6 +101,9 @@ not claimed as qualified. No live user notebook or kernel is used.
 
 ## Build and deployment
 
+For deliberate tag-triggered GitHub wheel publication, see
+[GitHub wheel releases](github-wheel-releases.md).
+
 Use `build==1.6.1` and `hatchling==1.32.4` in a fresh environment. From the pinned
 source checkout:
 

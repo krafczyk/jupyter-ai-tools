@@ -1,0 +1,6 @@
+{
+  "repository": "krafczyk/jupyter-ai-tools",
+  "distribution": "jupyter_ai_tools",
+  "maintenance_branch": "mkchad-0.5.2",
+  "version_file": "jupyter_ai_tools/__init__.py"
+}
